@@ -1,1 +1,10 @@
 # vfs-autobot
+
+ENV file parameters are 
+
+VFS_EMAIL
+VFS_PASSWORD
+SENDGRID_API_KEY
+SENDER_EMAIL
+RECEIVER_EMAIL
+DB_URL
