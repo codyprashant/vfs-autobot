@@ -105,7 +105,7 @@ const vfsAppointmentChecker =async () =>{
         await saveRecord(locationSelectionText, categorySelectionText, subCategorySelectionText, statusResponsetext, dateString, i);
 
         sleep.sleep('15');
-        await page.screenshot({path: `vfs-${i}.png`});
+//         await page.screenshot({path: `vfs-${i}.png`});
     }
 }
 
