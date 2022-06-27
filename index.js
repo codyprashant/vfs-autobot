@@ -17,7 +17,7 @@ app.get('/', function(request, response) {
   response.send(result);
 }).listen(app.get('port'), function() {
   const ENVIROINMENT = process.env.NODE_ENV || 'development';
-  const message = `Server Listening On Port ${PORT}, ENVIROINMENT=${ENVIROINMENT}`;
+  const message = `Server Listening On Port ${process.env.PORT}, ENVIROINMENT=${ENVIROINMENT}`;
   // eslint-disable-next-line no-console
   console.log(message);
 });
