@@ -24,7 +24,7 @@ app.get('/', function(request, response) {
 
 vfsAppointmentChecker();
 // cron.schedule('0 1-23 * * *', () => {
-cron.schedule('10,30,50 * * * * ', () => {  
+cron.schedule('10,40 * * * * ', () => {  
   console.log(vfsAppointmentChecker());
 });
 
