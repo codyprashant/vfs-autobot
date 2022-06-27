@@ -6,7 +6,10 @@ const subCategory = [12, 29, 45, 62, 78, 95, 111, 128];
 
 
 const vfsAppointmentChecker =async () =>{
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: true, args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+  ]});
     const page = await browser.newPage();
     await page.setExtraHTTPHeaders({'Accept-Language': 'en' });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36');
