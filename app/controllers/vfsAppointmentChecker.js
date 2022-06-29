@@ -1,8 +1,8 @@
 const puppeteer = require("puppeteer");
 const sleep = require('sleep');
 const { saveRecord } = require("./saveData");
-const type = [9, 26, 42, 59, 75, 92, 108, 125];
-const subCategory = [12, 29, 45, 62, 78, 95, 111, 128];
+const type = [9, 25, 41, 58, 74, 91, 107, 124];
+const subCategory = [12, 28, 44, 61, 77, 94, 110, 127];
 
 
 const vfsAppointmentChecker =async () =>{
