@@ -2,8 +2,9 @@
 This Autobot is written as MERN for getting slots on scheduled manner by fetching the information from VFS Global site.
 
 Related Projects are available at below projects for frontend to visualize data
-Backend for Frontend component : - https://github.com/codyprashant/vfs-tracker
-Frontend for Slots Tracking : - https://github.com/codyprashant/vfs-tracker-FE
+
+- Backend for Frontend component : - https://github.com/codyprashant/vfs-tracker
+- Frontend for Slots Tracking : - https://github.com/codyprashant/vfs-tracker-FE
 
 We will merge all three project soon in future.
 
