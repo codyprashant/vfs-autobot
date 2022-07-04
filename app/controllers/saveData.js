@@ -4,7 +4,8 @@ const objId = mongoDB.ObjectId;
 const dbUrl = process.env.DB_URL;
 const LocationRecord = require('../models/locationRecord')
 
-const saveRecord = async (locationSelectionText, categorySelectionText, subCategorySelectionText, statusResponsetext, dateString, locationCode) => {
+const saveRecord = async (locationSelectionText, categorySelectionText, subCategorySelectionText,
+     statusResponsetext, dateString, locationCode, availbileTime, availbileSlots) => {
     try{
         let location = {
             "locationName": locationSelectionText,
@@ -14,8 +15,9 @@ const saveRecord = async (locationSelectionText, categorySelectionText, subCateg
             "destinationCountry": "Netherlands",
             "availbileDate":  dateString ,
             "availbilityRes": statusResponsetext,
-            "locationCode": locationCode
-
+            "locationCode": locationCode,
+            "availbileTime":availbileTime,
+            "availbileSlots":availbileSlots
         }
         console.log("Adding Record")
         let locationRecord = new LocationRecord(location);

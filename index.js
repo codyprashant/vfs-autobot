@@ -8,6 +8,11 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
+const destination = process.env.DESTINATION_COUNTRY
+const origin = process.env.SOURCE_COUNTRY
+const email  = process.env.VFS_EMAIL
+const password = process.env.VFS_PASSWORD
+
 
 const app = express();
 app.set('port', (process.env.PORT || 5000));
@@ -22,9 +27,9 @@ app.get('/', function(request, response) {
   console.log(message);
 });
 
-vfsAppointmentChecker();
-// cron.schedule('0 1-23 * * *', () => {
-cron.schedule('10,40 * * * * ', () => {  
-  console.log(vfsAppointmentChecker());
-});
+vfsAppointmentChecker(destination, origin, email, password);
+// cron.schedule('0 1-23 * * *', () => { \\ every hour
+// cron.schedule('10,40 * * * * ', () => {  
+//   console.log(vfsAppointmentChecker(destination, origin));
+// });
 

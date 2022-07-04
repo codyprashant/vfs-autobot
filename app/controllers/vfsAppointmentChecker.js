@@ -1,111 +1,113 @@
+require('dotenv').config();
 const puppeteer = require("puppeteer");
 const sleep = require('sleep');
+const axios = require('axios').default;
+var urlencode = require('urlencode');
 const { saveRecord } = require("./saveData");
-const type = [9, 25, 41, 58, 74, 91, 107, 124];
-const subCategory = [12, 28, 44, 61, 77, 94, 110, 127];
 
 
-const vfsAppointmentChecker =async () =>{
-    const browser = await puppeteer.launch({headless: true, args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-  ]});
+const vfsAppointmentChecker =async (destination, origin, email, password) =>{
+    const browser = await puppeteer.launch({headless: false, product: 'chrome'
+    // , devtools:true
+      , args: [
+    // '--no-sandbox',
+    // '--disable-setuid-sandbox',
+    '--disable-web-security'
+        ]
+    });
+
+    let token = "";
     const page = await browser.newPage();
+    const page2 = await browser.newPage();
     await page.setExtraHTTPHeaders({'Accept-Language': 'en' });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36');
-
-    console.log(`Logging into VFS Services... for ${process.env.VFS_EMAIL}`);
+  
+    console.log(`Logging into VFS Services... for ${email}`);
     console.log("Accessing VFS Page");
     await page.goto("https://visa.vfsglobal.com/ind/en/nld/login");
-
-// page.on('request', interceptRequest => {
-//   console.log(interceptRequest.headers());
-// })
-
-
     await page.setViewport({ width: 1920, height: 929 });
     sleep.sleep('10');
-    console.log("Filling Email Id");
-    await page.waitForSelector("#mat-input-0");
-    await page.click("#mat-input-0");
-    await page.type("#mat-input-0", process.env.VFS_EMAIL);
-    sleep.sleep('5');
-    console.log("Filling Password");
-    await page.click("#mat-input-1");
-    await page.type("#mat-input-1", process.env.VFS_PASSWORD);
-    sleep.sleep('5');
-    console.log("Clicking Signin")
-    await page.waitForSelector(
-      ".form-group:nth-child(2) > .mat-form-field > .mat-form-field-wrapper > .mat-form-field-flex > .mat-form-field-infix"
-    );
-    await page.click(
-      ".form-group:nth-child(2) > .mat-form-field > .mat-form-field-wrapper > .mat-form-field-flex > .mat-form-field-infix"
-    );
-    sleep.sleep('5');
-    await page.waitForSelector(".row > .col-12 > .mat-card > .ng-dirty > .mat-focus-indicator");
-    await page.click(".row > .col-12 > .mat-card > .ng-dirty > .mat-focus-indicator");
-    sleep.sleep('10');
-    console.log("Clicking on New Appointment")
-    await page.waitForSelector('.container > .card-accordion > .position-relative > .mat-focus-indicator > .mat-button-wrapper');
-    await page.click('.container > .card-accordion > .position-relative > .mat-focus-indicator > .mat-button-wrapper');
 
-    for (let i = 0; i < 8; i++) {
-        sleep.sleep('10')
-        console.log(`Selecting ${i} city from list`)
-        await page.waitForSelector("#mat-select-value-1");
-        await page.click("#mat-select-value-1");
-        sleep.sleep('3');
-        await page.waitForSelector(`#cdk-overlay-0 > .mat-select-panel-wrap > #mat-select-0-panel > #mat-option-${i} > .mat-option-text`);
-        await page.click(`#cdk-overlay-0 > .mat-select-panel-wrap > #mat-select-0-panel > #mat-option-${i} > .mat-option-text`);
-        
-        sleep.sleep('10')
-        console.log("Clicking on Visa type selection")
-        await page.waitForSelector("#mat-select-value-3");
-        await page.click("#mat-select-value-3");
-        sleep.sleep('3');
-        console.log("selecting short Visa")
-        await page.waitForSelector(`#cdk-overlay-1 > .mat-select-panel-wrap > #mat-select-2-panel > #mat-option-${type[i]} > .mat-option-text`);
-        await page.click(`#cdk-overlay-1 > .mat-select-panel-wrap > #mat-select-2-panel > #mat-option-${type[i]} > .mat-option-text`);
-      
-        sleep.sleep('10')
-        console.log("Clicking on Purpose dropdown")
-        await page.waitForSelector(".mat-form-field-infix > #mat-select-4 > .mat-select-trigger > #mat-select-value-5 > .mat-select-placeholder");
-        await page.click(".mat-form-field-infix > #mat-select-4 > .mat-select-trigger > #mat-select-value-5 > .mat-select-placeholder");
-        sleep.sleep('3');
-        console.log("Selecting Business as purpose")
-        await page.waitForSelector(`#cdk-overlay-2 > .mat-select-panel-wrap > #mat-select-4-panel > #mat-option-${subCategory[i]} > .mat-option-text`);
-        await page.click(`#cdk-overlay-2 > .mat-select-panel-wrap > #mat-select-4-panel > #mat-option-${subCategory[i]} > .mat-option-text`);
-        
-        sleep.sleep('10')
-        await page.waitForSelector('.ng-untouched > .mat-card > .ng-touched > .border-info > .alert')
-        let statusResponse = await page.$(".ng-untouched > .mat-card > .ng-touched > .border-info > .alert");
+    const loginRes = await axios.post('https://lift-api.vfsglobal.com/user/login', `username=${email}&password=${password}&missioncode=${destination}&countrycode=${origin}`);
+      if(loginRes.status == 200){
+        // console.log(loginRes.data)
+        token = loginRes.data.accessToken
+      }
+      console.log(token)
+      sleep.sleep('10');  
 
-        const statusResponsetext = await (await statusResponse.getProperty('textContent')).jsonValue()
-        console.log('Status is', statusResponsetext);
-        let dateString ="";
-        if(statusResponsetext.includes("Earliest Available Slot")){
-          dateString = statusResponsetext.substring(statusResponsetext.indexOf(":") +1, statusResponsetext.length);
-          console.log(dateString.trim());
-        } else{
-          console.log(statusResponsetext)
+    let getLocations= await page2.evaluate(async (destination, origin) => { 
+        const resp = await fetch(`https://lift-api.vfsglobal.com/master/center/${destination}/${origin}/en-US`);
+        const jsonData = await resp.json();
+        return jsonData;
+     }, destination, origin); 
+     console.log("Locations")
+     sleep.sleep('5'); 
+
+    for (let i = 0; i < getLocations.length; i++) {
+        let getAppointmentCategory = await page2.evaluate(async (destination, origin, getLocations, i) => { 
+          const resp = await fetch(`https://lift-api.vfsglobal.com/master/visacategory/${destination}/${origin}/${getLocations[i].isoCode}/en-US`);
+          const jsonData = await resp.json();
+          return jsonData;
+        },destination, origin, getLocations, i ); 
+        console.log(`Category for ${getLocations[i].isoCode}`)
+        sleep.sleep('5'); 
+
+        for (let j = 0; j < getAppointmentCategory.length; j++) {
+          let getVisaSubCategory = await page2.evaluate(async (destination, origin, getLocations, i, getAppointmentCategory, j) => { 
+            const resp = await fetch(`https://lift-api.vfsglobal.com/master/subvisacategory/${destination}/${origin}/${getLocations[i].isoCode}/${getAppointmentCategory[j].code}/en-US`);
+            const jsonData = await resp.json();
+            return jsonData;
+          },destination, origin, getLocations, i, getAppointmentCategory, j); 
+          console.log(`SubCategory for ${getAppointmentCategory[j].code} of ${getLocations[i].isoCode}`)
+          sleep.sleep('5'); 
+          for (let k = 0; k < getVisaSubCategory.length; k++) {
+            try{
+              let url = `https://lift-api.vfsglobal.com/appointment/slots?countryCode=${origin}&missionCode=${destination}&centerCode=${urlencode(getLocations[i].isoCode)}&loginUser=${urlencode(email)}&visaCategoryCode=${urlencode(getVisaSubCategory[k].code)}&languageCode=en-US&applicantsCount=1&days=180&fromDate=05%2F07%2F2022&slotType=2&toDate=28%2F12%2F2022`;
+              console.log(url)
+              if(token != ""){
+                await page.evaluate((token, url) => { 
+                    var xhr = new XMLHttpRequest;
+                    var data = null;
+                    xhr.open("GET", url);
+                    xhr.setRequestHeader("authorization", token);
+                    xhr.send(data);
+                    xhr.onreadystatechange = function() {
+                      if (this.readyState == 4 && this.status == 200) {
+                        var response = xhr.responseText;
+                        localStorage.setItem('slotResponse', response)
+                      };
+                    };
+                }, token, url).then(async respo =>{
+                  return await page.evaluate(() => { 
+                    let responseData = localStorage.getItem('slotResponse')
+                    let responseData2 = JSON.parse(responseData);
+                    console.log('Ia ma here')
+                    return responseData2;
+                  })
+                }).then(async res => {
+                    if(res?.length > 0){
+                      console.log(res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.timeSlot) 
+                      console.log(res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats) 
+                      let timeSlot = res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.timeSlot ? res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.timeSlot : "";
+                      let totalSeats = res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats ? res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats : ""
+                      await saveRecord(res[0]?.center, getAppointmentCategory[j]?.name, getVisaSubCategory[k]?.name, res[0]?.date, res[0]?.date, i,timeSlot, totalSeats);
+                    }
+                  })
+                
+                sleep.sleep('10'); 
+
+              } else{
+                console.log("No Access Token")
+              }
+  
+            } catch(error){
+              console.log(error)
+            }
+
+          }  
+
         }
-        const locationSelection = await page.$('#mat-select-value-1 > .mat-select-value-text > .mat-select-min-line');
-        const locationSelectionText = await (await locationSelection.getProperty('textContent')).jsonValue()
-        console.log('Location is', locationSelectionText);
-
-        const categorySelection = await page.$('#mat-select-value-3 > .mat-select-value-text > .mat-select-min-line');
-        const categorySelectionText = await (await categorySelection.getProperty('textContent')).jsonValue()
-        console.log('Category is', categorySelectionText);
-
-        const subCategorySelection = await page.$('#mat-select-value-5 > .mat-select-value-text > .mat-select-min-line');
-        const subCategorySelectionText = await (await subCategorySelection.getProperty('textContent')).jsonValue()
-        console.log('SubCategory is', subCategorySelectionText);
-
-        // await saveRecord("Netherlands Visa Application Center,Hyderabad", "Short-stay Visa", "Business", " Earliest Available Slot : 04/08/2022 ", " 04/08/2022 ");
-        await saveRecord(locationSelectionText, categorySelectionText, subCategorySelectionText, statusResponsetext, dateString, i);
-
-        sleep.sleep('15');
-//         await page.screenshot({path: `vfs-${i}.png`});
     }
 }
 
