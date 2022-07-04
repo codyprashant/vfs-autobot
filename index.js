@@ -5,9 +5,6 @@ require('./app/config/db');
 var cron = require('node-cron');
 const { vfsAppointmentChecker } = require('./app/controllers/vfsAppointmentChecker');
 const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const morgan = require('morgan');
 const destination = process.env.DESTINATION_COUNTRY
 const origin = process.env.SOURCE_COUNTRY
 const email  = process.env.VFS_EMAIL
@@ -29,7 +26,7 @@ app.get('/', function(request, response) {
 
 vfsAppointmentChecker(destination, origin, email, password);
 // cron.schedule('0 1-23 * * *', () => { \\ every hour
-// cron.schedule('10,40 * * * * ', () => {  
-//   console.log(vfsAppointmentChecker(destination, origin));
-// });
+cron.schedule('10,40 * * * * ', () => {  
+  console.log(vfsAppointmentChecker(destination, origin));
+});
 

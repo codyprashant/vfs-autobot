@@ -10,8 +10,8 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
     const browser = await puppeteer.launch({headless: false, product: 'chrome'
     // , devtools:true
       , args: [
-    // '--no-sandbox',
-    // '--disable-setuid-sandbox',
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
     '--disable-web-security'
         ]
     });
