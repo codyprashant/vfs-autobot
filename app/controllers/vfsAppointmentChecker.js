@@ -7,7 +7,7 @@ const { saveRecord } = require("./saveData");
 
 
 const vfsAppointmentChecker =async (destination, origin, email, password) =>{
-    const browser = await puppeteer.launch({headless: false, product: 'chrome'
+    const browser = await puppeteer.launch({headless: true
     // , devtools:true
       , args: [
     '--no-sandbox',
@@ -45,7 +45,7 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
      sleep.sleep('5'); 
 
     for (let i = 0; i < getLocations.length; i++) {
-        let getAppointmentCategory = await page2.evaluate(async (destination, origin, getLocations, i) => { 
+        let getAppointmentCategory = await page.evaluate(async (destination, origin, getLocations, i) => { 
           const resp = await fetch(`https://lift-api.vfsglobal.com/master/visacategory/${destination}/${origin}/${getLocations[i].isoCode}/en-US`);
           const jsonData = await resp.json();
           return jsonData;

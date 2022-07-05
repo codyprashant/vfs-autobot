@@ -26,7 +26,7 @@ app.get('/', function(request, response) {
 
 vfsAppointmentChecker(destination, origin, email, password);
 // cron.schedule('0 1-23 * * *', () => { \\ every hour
-cron.schedule('10,40 * * * * ', () => {  
+cron.schedule('10 * * * * ', () => {  
   console.log(vfsAppointmentChecker(destination, origin));
 });
 
