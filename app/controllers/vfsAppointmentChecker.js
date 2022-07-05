@@ -7,7 +7,7 @@ const { saveRecord } = require("./saveData");
 
 
 const vfsAppointmentChecker =async (destination, origin, email, password) =>{
-    const browser = await puppeteer.launch({headless: true
+    const browser = await puppeteer.launch({headless: false
     // , devtools:true
       , args: [
     '--no-sandbox',
