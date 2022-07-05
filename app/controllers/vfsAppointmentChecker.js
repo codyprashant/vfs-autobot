@@ -7,8 +7,8 @@ const { saveRecord } = require("./saveData");
 
 
 const vfsAppointmentChecker =async (destination, origin, email, password) =>{
-    const browser = await puppeteer.launch({headless: false
-    // , devtools:true
+    const browser = await puppeteer.launch({headless: true
+    , devtools:true
       , args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -21,7 +21,6 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
     const page2 = await browser.newPage();
     await page.setExtraHTTPHeaders({'Accept-Language': 'en' });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36');
-  
     console.log(`Logging into VFS Services... for ${email}`);
     console.log("Accessing VFS Page");
     await page.goto("https://visa.vfsglobal.com/ind/en/nld/login");
