@@ -9,6 +9,8 @@ const destination = process.env.DESTINATION_COUNTRY
 const origin = process.env.SOURCE_COUNTRY
 const email  = process.env.VFS_EMAIL
 const password = process.env.VFS_PASSWORD
+const visaCategoryEnv = process.env.VISA_CATEGORY || 'NAPP'
+const subCategoryEnv = process.env.SUB_CATEGORY || 'NAPP'
 
 
 const app = express();
@@ -24,7 +26,7 @@ app.get('/', function(request, response) {
   console.log(message);
 });
 
-vfsAppointmentChecker(destination, origin, email, password);
+vfsAppointmentChecker(destination, origin, email, password, visaCategoryEnv, subCategoryEnv);
 // cron.schedule('0 1-23 * * *', () => { \\ every hour
 cron.schedule('10 * * * * ', () => {  
   console.log(vfsAppointmentChecker(destination, origin));

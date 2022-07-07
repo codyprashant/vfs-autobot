@@ -8,7 +8,8 @@ const { getFormattedDate } = require('../utils');
 const { saveRecord } = require("./saveData");
 
 
-const vfsAppointmentChecker =async (destination, origin, email, password) =>{
+
+const vfsAppointmentChecker =async (destination, origin, email, password, visaCategoryEnv, subCategoryEnv) =>{
   var xvfb = new Xvfb({
     silent: true,
     xvfb_args: ["-screen", "0", '1280x720x24', "-ac"],
@@ -60,6 +61,7 @@ xvfb.start((err)=>{if (err) console.error(err)})
         sleep.sleep('5'); 
 
         for (let j = 0; j < getAppointmentCategory.length; j++) {
+          if(visaCategoryEnv != 'NA') if(getAppointmentCategory[j].code != visaCategoryEnv) continue;
           let getVisaSubCategory = await page2.evaluate(async (destination, origin, getLocations, i, getAppointmentCategory, j) => { 
             const resp = await fetch(`https://lift-api.vfsglobal.com/master/subvisacategory/${destination}/${origin}/${getLocations[i].isoCode}/${getAppointmentCategory[j].code}/en-US`);
             const jsonData = await resp.json();
@@ -69,6 +71,7 @@ xvfb.start((err)=>{if (err) console.error(err)})
           sleep.sleep('5'); 
           for (let k = 0; k < getVisaSubCategory.length; k++) {
             try{
+              if(subCategoryEnv != 'NA') if(getVisaSubCategory[k].code != subCategoryEnv) continue;
               let formattedDate = await getFormattedDate();
               console.log(formattedDate)
               let url = `https://lift-api.vfsglobal.com/appointment/slots?countryCode=${origin}&missionCode=${destination}&centerCode=${urlencode(getLocations[i].isoCode)}&loginUser=${urlencode(email)}&visaCategoryCode=${urlencode(getVisaSubCategory[k].code)}&languageCode=en-US&applicantsCount=1&days=180&fromDate=${formattedDate}&slotType=2&toDate=28%2F12%2F2022`;
@@ -99,9 +102,12 @@ xvfb.start((err)=>{if (err) console.error(err)})
                       console.log(res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats) 
                       let timeSlot = res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.timeSlot ? res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.timeSlot : "";
                       let totalSeats = res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats ? res[0]?.counters[0]?.groups[0]?.timeSlots[0]?.totalSeats : ""
-                      await saveRecord(res[0]?.center, getAppointmentCategory[j]?.name, getVisaSubCategory[k]?.name, res[0]?.date, res[0]?.date, i,timeSlot, totalSeats);
+                      let dataRecord = await saveRecord(res[0]?.center, getAppointmentCategory[j]?.name, getVisaSubCategory[k]?.name, res[0]?.date, res[0]?.date, i,timeSlot, totalSeats);
+                      return dataRecord;
+                    }else{
+                      return "REsponse is empty"
                     }
-                  })
+                  }).then(r => console.log(r))
                 
                 sleep.sleep('10'); 
 
