@@ -21,6 +21,25 @@ async function sendEmail(location, slotDate, slotTime, toEmail) {
 
 }
 
+async function sendErrorEmail(location, slotDate, slotTime, toEmail, error) {
+  var htmlMessage = `You are receiving this email as you have registered yourself for VFS alerts. <br />
+  Earliest Slot available for ${location} is ${slotDate} at ${slotTime} <br />
+  
+  We have got error while generating email for this alert with below error<br />
+  ${error}`;
+
+  const message = {
+    to: toEmail,
+    from: process.env.SENDER_EMAIL,
+    subject: "codyPrashant - VFS alerts",
+    html: htmlMessage,
+  };
+
+  console.log("testing")
+  return sgMail.send(message);
+
+}
+
 async function getFormattedDate(){
   let date = new Date();
   let day = date.getUTCDate()
@@ -37,4 +56,4 @@ async function getFormattedDate(){
   return formattedDate;
 }
 
-module.exports = { sendEmail, getFormattedDate };
+module.exports = { sendEmail, getFormattedDate, sendErrorEmail };

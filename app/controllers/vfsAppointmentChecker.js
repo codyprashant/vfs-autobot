@@ -83,14 +83,14 @@ xvfb.start((err)=>{if (err) console.error(err)})
                     xhr.onreadystatechange = function() {
                       if (this.readyState == 4 && this.status == 200) {
                         var response = xhr.responseText;
+                        localStorage.removeItem("slotResponse");
                         localStorage.setItem('slotResponse', response)
-                      };
+                      }
                     };
                 }, token, url).then(async respo =>{
                   return await page.evaluate(() => {
                     let responseData = localStorage.getItem('slotResponse')
                     let responseData2 = JSON.parse(responseData);
-                    console.log('Ia ma here')
                     return responseData2;
                   })
                 }).then(async res => {
