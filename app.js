@@ -12,7 +12,7 @@ const password = process.env.VFS_PASSWORD
 
 
 const app = express();
-app.set('port', (process.env.PORT || 5000));
+app.set('port', (process.env.PORT));
 
 app.get('/', function(request, response) {
   var result = 'App is running'

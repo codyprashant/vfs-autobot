@@ -12,7 +12,7 @@ if (!dbURL) {
 
 async function connectToDB() {
   // eslint-disable-next-line no-console
-  console.log(`Connecting to Databse`);
+  console.log(`Connecting to Databse ${dbURL}`);
 
   try {
     await mongoose.connect(dbURL);

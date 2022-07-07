@@ -1,17 +1,18 @@
 "use strict";
 require("dotenv").config();
 const sgMail = require("@sendgrid/mail");
+var urlencode = require('urlencode');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-async function sendEmail() {
-    var htmlMessage = `You have raised password reset request. Please click on below URL to reset Password
-                      <a href="${process.env.FRONTEND_URL}/pages/auth/resetPwd/${encryptText}"> Verify our Account</a>`;
+async function sendEmail(location, slotDate, slotTime, toEmail) {
+    var htmlMessage = `You are receiving this email as you have registered yourself for VFS alerts. <br />
+    Earliest Slot available for ${location} is ${slotDate} at ${slotTime}`;
 
     const message = {
       to: toEmail,
       from: process.env.SENDER_EMAIL,
-      subject: "Password Reset",
+      subject: "codyPrashant - VFS alerts",
       html: htmlMessage,
     };
 
@@ -20,4 +21,20 @@ async function sendEmail() {
 
 }
 
-module.exports = { sendEmail };
+async function getFormattedDate(){
+  let date = new Date();
+  let day = date.getUTCDate()
+  let month = date.getUTCMonth() + 1
+  let year = date.getUTCFullYear()
+
+  if(day < 9){
+      day = `0${day}`
+  }
+  if(month < 9){
+    month = `0${month}`
+}
+  let formattedDate = urlencode(`${day}/${month}/${year}`)
+  return formattedDate;
+}
+
+module.exports = { sendEmail, getFormattedDate };

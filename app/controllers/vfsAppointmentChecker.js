@@ -3,11 +3,18 @@ const puppeteer = require("puppeteer");
 const sleep = require('sleep');
 const axios = require('axios').default;
 var urlencode = require('urlencode');
+const Xvfb = require('xvfb');
+const { getFormattedDate } = require('../utils');
 const { saveRecord } = require("./saveData");
 
 
 const vfsAppointmentChecker =async (destination, origin, email, password) =>{
-    const browser = await puppeteer.launch({headless: true
+  var xvfb = new Xvfb({
+    silent: true,
+    xvfb_args: ["-screen", "0", '1280x720x24', "-ac"],
+});
+xvfb.start((err)=>{if (err) console.error(err)})
+    const browser = await puppeteer.launch({headless: false
     , devtools:true
       , args: [
     '--no-sandbox',
@@ -62,7 +69,9 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
           sleep.sleep('5'); 
           for (let k = 0; k < getVisaSubCategory.length; k++) {
             try{
-              let url = `https://lift-api.vfsglobal.com/appointment/slots?countryCode=${origin}&missionCode=${destination}&centerCode=${urlencode(getLocations[i].isoCode)}&loginUser=${urlencode(email)}&visaCategoryCode=${urlencode(getVisaSubCategory[k].code)}&languageCode=en-US&applicantsCount=1&days=180&fromDate=05%2F07%2F2022&slotType=2&toDate=28%2F12%2F2022`;
+              let formattedDate = await getFormattedDate();
+              console.log(formattedDate)
+              let url = `https://lift-api.vfsglobal.com/appointment/slots?countryCode=${origin}&missionCode=${destination}&centerCode=${urlencode(getLocations[i].isoCode)}&loginUser=${urlencode(email)}&visaCategoryCode=${urlencode(getVisaSubCategory[k].code)}&languageCode=en-US&applicantsCount=1&days=180&fromDate=${formattedDate}&slotType=2&toDate=28%2F12%2F2022`;
               console.log(url)
               if(token != ""){
                 await page.evaluate((token, url) => { 
@@ -78,7 +87,7 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
                       };
                     };
                 }, token, url).then(async respo =>{
-                  return await page.evaluate(() => { 
+                  return await page.evaluate(() => {
                     let responseData = localStorage.getItem('slotResponse')
                     let responseData2 = JSON.parse(responseData);
                     console.log('Ia ma here')
@@ -98,16 +107,22 @@ const vfsAppointmentChecker =async (destination, origin, email, password) =>{
 
               } else{
                 console.log("No Access Token")
+                await browser.close()
+                xvfb.stop();
               }
   
             } catch(error){
               console.log(error)
+              await browser.close()
+              xvfb.stop();
             }
 
           }  
 
         }
     }
+    await browser.close()
+    xvfb.stop();
 }
 
 
